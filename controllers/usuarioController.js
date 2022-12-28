@@ -65,18 +65,72 @@ const confirmar = async (req, res) => {
 
   try {
     usuarioConfirmar.confirmado = true
-    usuarioConfirmar.token  = ''
+    usuarioConfirmar.token = ''
     await usuarioConfirmar.save()
-    res.json({msg: 'El usuario ha sido confirmado correctamente'})
+    res.json({ msg: 'El usuario ha sido confirmado correctamente' })
   } catch (error) {
-    console.log(error) 
+    console.log(error)
   }
 }
 
+const olvidePassword = async (req, res) => {
+
+  const { email } = req.body
+
+  const usuario = await Usuario.findOne({ email })
+
+  if (!usuario) {
+    const error = new Error('El usuario no existe')
+    return res.status(404).send({ msg: error.message })
+  }
+
+  try {
+    usuario.token = generarId()
+    await usuario.save()
+    res.send({ msg: 'Hemos enviado un correo con las instrucciones' })
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+
+const comprobarToken = async (req, res) => {
+  const { token } = req.params
+
+  const tokenValido = await Usuario.findOne({ token })
+  if (tokenValido) {
+    return res.send({ mdg: 'El token es valido y el usuario existe' })
+  }
+
+  const error = new Error('El token no es valido')
+  return res.status(403).send({ msg: error.message })
+
+}
+
+const nuevoPassword = async (req, res) => {
+  const { token } = req.params
+  const { password } = req.body
+  const usuario = await Usuario.findOne({ token }) 
+  if(usuario){
+    usuario.password = password
+    usuario.token = ''
+    res.json({msg: "Password modificado Correctamente"})
+  }
+}
+
+
+const perfil = async(req,res)=> {
+  const {usuario} = req
+  res.json(usuario)
+}
 export {
+  comprobarToken,
+  olvidePassword,
   registrar,
   autenticar,
-  confirmar
+  confirmar,
+  nuevoPassword,
+  perfil 
 }
 
 
