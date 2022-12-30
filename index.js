@@ -4,13 +4,28 @@ import dotenv from 'dotenv'
 import usarioRouter from './routes/usuarioRouter.js'
 import proyectoRouter from './routes/proyectoRoutes.js'
 import tareaRouter from "./routes/tareaRoutes.js"
-import checkAuth from "./middlewares/checkAuth.js"
-
+// import checkAuth from "./middlewares/checkAuth.js"
+import cors from 'cors'
 dotenv.config()
 
 const app = express()
 
 conectarDb()
+
+
+
+const whiteList = [process.env.FRONTEND_URL]
+const corsOptions = {
+  origin: function(origin, callback){
+    if(whiteList.includes(origin)){
+      callback(null, true)
+    }else {
+      callback( new Error('Error de Cors'))
+    }
+  }
+}
+
+app.use(cors(corsOptions))
 
 const PORT =  process.env.PORT || 4000
 
