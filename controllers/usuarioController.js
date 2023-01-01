@@ -1,4 +1,4 @@
-import { emailRegistro } from "../helpers/emails.js"
+import { emailOlvidePassword, emailRegistro } from "../helpers/emails.js"
 import generarId from "../helpers/generarId.js"
 import generarJWT from "../helpers/generarJWT.js"
 import Usuario from "../models/Usuario.js"
@@ -26,7 +26,7 @@ const registrar = async (req, res) => {
       token: usuario.token,
       nombre: usuario.nombre
     })
-    res.send({msg: 'Usuario creado correctamente, revisa tu email para confirmar tu cuenta'})
+    res.send({ msg: 'Usuario creado correctamente, revisa tu email para confirmar tu cuenta' })
   } catch (error) {
     console.log(error)
   }
@@ -85,7 +85,7 @@ const confirmar = async (req, res) => {
 const olvidePassword = async (req, res) => {
 
   const { email } = req.body
-
+  console.log(email)
   const usuario = await Usuario.findOne({ email })
 
   if (!usuario) {
@@ -96,6 +96,13 @@ const olvidePassword = async (req, res) => {
   try {
     usuario.token = generarId()
     await usuario.save()
+
+    // enviar email 
+    emailOlvidePassword({
+      email: usuario.email,
+      token: usuario.token,
+      nombre: usuario.nombre
+    })
     res.send({ msg: 'Hemos enviado un correo con las instrucciones' })
   } catch (error) {
     console.log(error)
@@ -119,17 +126,18 @@ const comprobarToken = async (req, res) => {
 const nuevoPassword = async (req, res) => {
   const { token } = req.params
   const { password } = req.body
-  const usuario = await Usuario.findOne({ token }) 
-  if(usuario){
+  const usuario = await Usuario.findOne({ token })
+  if (usuario) {
     usuario.password = password
     usuario.token = ''
-    res.json({msg: "Password modificado Correctamente"})
+    await usuario.save()
+    res.json({ msg: "Password modificado Correctamente" })
   }
 }
 
 
-const perfil = async(req,res)=> {
-  const {usuario} = req
+const perfil = async (req, res) => {
+  const { usuario } = req
   res.json(usuario)
 }
 export {
@@ -139,7 +147,7 @@ export {
   autenticar,
   confirmar,
   nuevoPassword,
-  perfil 
+  perfil
 }
 
 
