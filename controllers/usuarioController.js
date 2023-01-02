@@ -85,7 +85,6 @@ const confirmar = async (req, res) => {
 const olvidePassword = async (req, res) => {
 
   const { email } = req.body
-  console.log(email)
   const usuario = await Usuario.findOne({ email })
 
   if (!usuario) {

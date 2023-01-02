@@ -9,7 +9,6 @@ const obtenerProyectos = async (req, res) => {
 const nuevoProyecto = async (req, res) => {
   const proyecto = new Proyecto(req.body)
   proyecto.creador = req.usuario._id
-  console.log(req.usuario)
   try {
     const proyectoAlmacenado = await proyecto.save()
     res.send(proyectoAlmacenado)
@@ -21,7 +20,7 @@ const nuevoProyecto = async (req, res) => {
 const obtenerProyecto = async (req, res) => {
   const { id } = req.params
 
-  const proyecto = await Proyecto.findById(id)
+  const proyecto = await Proyecto.findById(id).populate('tareas')
 
   if (!proyecto) {
     const error = new Error('Proyecto no encontrado')
@@ -34,10 +33,10 @@ const obtenerProyecto = async (req, res) => {
   }
 
   const tareas = await Tarea.find().where('proyecto').equals(proyecto._id)
-  res.json({
-    proyecto,
-    tareas
-  })
+
+  res.json(
+    proyecto
+  )
 }
 
 const editarProyecto = async (req, res) => {
@@ -64,7 +63,7 @@ const editarProyecto = async (req, res) => {
     const proyectoAlmacenado = proyecto.save()
     res.send(proyecto)
   } catch (error) {
-    console.log(error) 
+    console.log(error)
   }
 }
 
@@ -85,9 +84,9 @@ const eliminarProyecto = async (req, res) => {
   }
   try {
     await proyecto.deleteOne()
-    res.json({msg: 'Proyecto eliminado'})
+    res.json({ msg: 'Proyecto eliminado' })
   } catch (error) {
-    console.log(error) 
+    console.log(error)
   }
 }
 
